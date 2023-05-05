@@ -610,16 +610,19 @@ class FeedbackItem extends React.Component<IFeedbackItemProps, IFeedbackItemStat
   }
 
   public render(): JSX.Element {
+    const userIdentity = process.env.NODE_ENV !== 'development' ?
+      getUserIdentity().id : localStorageHelper.getCurrentUser().id;
     const showVoteButton = (this.props.workflowPhase === WorkflowPhase.Vote);
     const showAddActionItem = (this.props.workflowPhase === WorkflowPhase.Act);
     const showVotes = showVoteButton || showAddActionItem;
+    const isEditableTitle = (this.props.workflowPhase == WorkflowPhase.Collect) && userIdentity == this.props.userIdRef;
     const isDraggable = this.props.isInteractable && this.props.workflowPhase === WorkflowPhase.Group && !this.state.isMarkedForDeletion;
     const isNotGroupedItem = !this.props.groupedItemProps;
     const isMainItem = isNotGroupedItem || this.props.groupedItemProps.isMainItem;
     const isGroupedCarouselItem = this.props.isGroupedCarouselItem;
     const groupItemsCount = this.props && this.props.groupedItemProps && this.props.groupedItemProps.groupedCount + 1;
     const ariaLabel = isNotGroupedItem ? 'Feedback item.' : (!isMainItem ? 'Feedback group item.' : 'Feedback group main item. Group has ' + groupItemsCount + ' items.');
-    const hideFeedbackItems = this.props.hideFeedbackItems && (this.props.userIdRef !== getUserIdentity().id);
+    const hideFeedbackItems = this.props.hideFeedbackItems && (this.props.userIdRef !== userIdentity);
     const curTimerState = this.props.timerState;
     const originalColumnId = this.props.originalColumnId;
     const originalColumnTitle = originalColumnId ? this.props.columns[originalColumnId].columnProperties.title : 'n/a';
@@ -831,13 +834,13 @@ class FeedbackItem extends React.Component<IFeedbackItemProps, IFeedbackItemStat
                     </button>
                   }
                 </div>
-                {this.props.isInteractable && <EditableDocumentCardTitle
+                {isEditableTitle && <EditableDocumentCardTitle
                   isMultiline={true}
                   title={this.props.title}
                   isChangeEventRequired={false}
                   onSave={this.onDocumentCardTitleSave}
                 />}
-                {!this.props.isInteractable &&
+                {!isEditableTitle &&
                   <div
                     className="non-editable-text-container">
                     <p className="non-editable-text">
